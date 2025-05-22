@@ -1,7 +1,7 @@
 // src/Property.js
 import React from 'react';
 
-const Property = ({ name, color, pos, isSelected, onClick }) => {
+const Property = ({ name, color, pos, price, isSelected, onClick }) => {
   const style = {
     gridArea: `${pos[0]} / ${pos[1]} / span 1 / span 1`,
   };
