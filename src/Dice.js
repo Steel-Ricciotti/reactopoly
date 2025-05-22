@@ -1,9 +1,24 @@
 // src/Dice.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-const Dice = ({ onRoll, onBuy, squareName, squarePrice, squareOwner, triggerFlash }) => {
+const Dice = ({
+  onRoll,
+  onPositionUpdate,
+  onBuy,
+  onPass,
+  onOther,
+  currentPlayerObj,
+  currentPlayer,
+  players,
+  properties,
+  triggerFlash,
+}) => {
   const [diceValues, setDiceValues] = useState([1, 1]);
   const [isRolling, setIsRolling] = useState(false);
+  const [flashState, setFlashState] = useState('idle');
+  const [flashMessage, setFlashMessage] = useState('');
+  const [showButtons, setShowButtons] = useState(false);
+  const [waitingForAction, setWaitingForAction] = useState(false);
 
   const rollDice = () => {
     setIsRolling(true);
@@ -15,7 +30,61 @@ const Dice = ({ onRoll, onBuy, squareName, squarePrice, squareOwner, triggerFlas
       setDiceValues(newValues);
       setIsRolling(false);
       onRoll(newValues);
+      // Update position
+      const total = newValues[0] + newValues[1];
+      const newPosition = (currentPlayerObj.position + total) % 40;
+      onPositionUpdate(currentPlayerObj.id, newPosition);
+      // Set first flash
+      const currentSquare = properties[newPosition];
+      setFlashState('current');
+      setFlashMessage(
+        `${currentPlayerObj.name}: ${currentSquare.name}${
+          currentSquare.price !== undefined && currentSquare.type === 'property' ? ` ($${currentSquare.price})` : ''
+        }`
+      );
+      const needsAction = currentSquare.owner === null && currentSquare.price !== undefined && currentSquare.type === 'property';
+      setShowButtons(needsAction);
+      setWaitingForAction(needsAction);
     }, 1000);
+  };
+
+  useEffect(() => {
+    let timer;
+    if (flashState === 'current' && !waitingForAction) {
+      timer = setTimeout(() => {
+        const currentSquare = properties[currentPlayerObj.position];
+        if (currentSquare.type !== 'property' || currentSquare.owner !== null) {
+          onOther();
+        }
+        setFlashState('pause');
+        setFlashMessage('');
+        setShowButtons(false);
+      }, 1500);
+    } else if (flashState === 'pause') {
+      timer = setTimeout(() => {
+        setFlashState('next');
+        const currentIndex = players.findIndex((p) => p.id === currentPlayer);
+        const nextPlayer = players[(currentIndex ) % players.length];
+        setFlashMessage(`${nextPlayer.name}'s Turn`);
+      }, 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [flashState, waitingForAction, currentPlayer, players, currentPlayerObj, properties, onOther]);
+
+  const handleBuy = () => {
+    onBuy();
+    setWaitingForAction(false);
+    setFlashState('pause');
+    setFlashMessage('');
+    setShowButtons(false);
+  };
+
+  const handlePass = () => {
+    onPass();
+    setWaitingForAction(false);
+    setFlashState('pause');
+    setFlashMessage('');
+    setShowButtons(false);
   };
 
   return (
@@ -24,21 +93,29 @@ const Dice = ({ onRoll, onBuy, squareName, squarePrice, squareOwner, triggerFlas
         <div className={`die ${isRolling ? 'rolling' : ''}`}>{diceValues[0]}</div>
         <div className={`die ${isRolling ? 'rolling' : ''}`}>{diceValues[1]}</div>
       </div>
-      <button className="roll-button" onClick={rollDice} disabled={isRolling}>
+      <button className="roll-button" onClick={rollDice} disabled={isRolling || waitingForAction}>
         {isRolling ? 'Rolling...' : 'Roll Dice'}
       </button>
       <div className="square-flash-container">
-        <div className={`square-flash ${isRolling ? '' : triggerFlash ? 'flashing' : ''}`}>
-          {squareName} {squarePrice !== undefined ? `($${squarePrice})` : ''}
-        </div>
-        {squarePrice !== undefined && (
-          squareOwner === null ? (
-            <button className="buy-button" onClick={onBuy}>Buy</button>
-          ) : (
-            <div className={`pay-rent ${isRolling ? '' : triggerFlash ? 'flashing' : ''}`}>
-              Pay Rent
-            </div>
-          )
+        {flashMessage && (
+          <div className={`square-flash ${triggerFlash && flashState !== 'pause' ? 'flashing' : ''}`}>
+            {flashMessage}
+          </div>
+        )}
+        {showButtons && flashState === 'current' && (
+          <div className="button-container">
+            <button className="buy-button" onClick={handleBuy} disabled={isRolling}>
+              Buy
+            </button>
+            <button className="pass-button" onClick={handlePass} disabled={isRolling}>
+              Pass
+            </button>
+          </div>
+        )}
+        {!showButtons && flashState === 'current' && properties[currentPlayerObj.position].owner !== null && properties[currentPlayerObj.position].price !== undefined && (
+          <div className={`pay-rent ${triggerFlash ? 'flashing' : ''}`}>
+            Pay Rent
+          </div>
         )}
       </div>
     </div>

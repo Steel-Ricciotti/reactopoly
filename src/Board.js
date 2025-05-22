@@ -1,130 +1,3 @@
-// // src/Board.js
-// import React, { useState, useEffect } from 'react';
-// import Property from './Property';
-// import Corner from './Corner';
-// import Dice from './Dice';
-// import Piece from './Piece';
-// import Player from './Player';
-// import { properties as initialProperties } from './properties';
-
-// const Board = () => {
-//   const [selectedProperty, setSelectedProperty] = useState(null);
-//   const [playerPosition, setPlayerPosition] = useState(0);
-//   const [flashTrigger, setFlashTrigger] = useState(false);
-//   const [properties, setProperties] = useState(initialProperties);
-//   const [players, setPlayers] = useState([
-//     {
-//       id: 'Player 1',
-//       name: 'Player 1',
-//       piece: 'Thimble',
-//       balance: 1500.0,
-//       properties: [],
-//     },
-//   ]);
-
-//   const handlePropertyClick = (name) => {
-//     setSelectedProperty(name);
-//   };
-
-//   const handleDiceRoll = (values) => {
-//     const total = values[0] + values[1];
-//     setPlayerPosition((prev) => (prev + total) % 40);
-//     setFlashTrigger(true);
-//   };
-
-//   const handleBuy = (playerId) => {
-//     const currentProperty = properties[playerPosition];
-//     const player = players.find((p) => p.id === playerId);
-//     if (
-//       currentProperty.owner === null &&
-//       currentProperty.price !== undefined &&
-//       player.balance >= currentProperty.price
-//     ) {
-//       setProperties((prev) =>
-//         prev.map((prop, index) =>
-//           index === playerPosition ? { ...prop, owner: playerId } : prop
-//         )
-//       );
-//       setPlayers((prev) =>
-//         prev.map((p) =>
-//           p.id === playerId
-//             ? {
-//                 ...p,
-//                 balance: p.balance - currentProperty.price,
-//                 properties: [...p.properties, { ...currentProperty, owner: playerId }],
-//               }
-//             : p
-//         )
-//       );
-//       setFlashTrigger(true);
-//     }
-//   };
-
-//   useEffect(() => {
-//     if (flashTrigger) {
-//       setTimeout(() => setFlashTrigger(false), 1500);
-//     }
-//   }, [flashTrigger]);
-
-//   return (
-//     <div className="board">
-//       <div className="center">
-        
-//         <Dice
-//           onRoll={handleDiceRoll}
-//           onBuy={() => handleBuy('Player 1')}
-//           squareName={properties[playerPosition].name}
-//           squarePrice={properties[playerPosition].price}
-//           squareOwner={properties[playerPosition].owner}
-//           triggerFlash={flashTrigger}
-//         />
-//         {players.map((player) => (
-//           <Player
-//             key={player.id}
-//             name={player.name}
-//             piece={player.piece}
-//             balance={player.balance}
-//             properties={player.properties}
-//           />
-//         ))}
-//       </div>
-//       {properties.map((prop) => {
-//         if (prop.type === 'corner') {
-//           return <Corner key={prop.name} name={prop.name} pos={prop.pos} />;
-//         }
-//         return (
-//           <Property
-//             key={prop.name}
-//             name={prop.name}
-//             color={prop.color}
-//             pos={prop.pos}
-//             isSelected={selectedProperty === prop.name}
-//             onClick={() => handlePropertyClick(prop.name)}
-//           />
-//         );
-//       })}
-//       <Piece position={playerPosition} pieceType={players[0].piece} />
-//       {players.map((player) =>
-//         player.properties.map((prop, index) => (
-//           <div
-//             key={`${player.id}-${prop.name}`}
-//             className="property-card"
-//             style={{
-//               bottom: '-85px',
-//               left: `${10 + index * 65}px`,
-//             }}
-//           >
-//             <div className={`color-bar ${prop.color}`}></div>
-//             <span>{prop.name}</span>
-//           </div>
-//         ))
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Board;
-
 // src/Board.js
 import React, { useState, useEffect } from 'react';
 import Property from './Property';
@@ -136,7 +9,6 @@ import { properties as initialProperties } from './properties';
 
 const Board = () => {
   const [selectedProperty, setSelectedProperty] = useState(null);
-  const [playerPosition, setPlayerPosition] = useState(0);
   const [flashTrigger, setFlashTrigger] = useState(false);
   const [properties, setProperties] = useState(initialProperties);
   const [players, setPlayers] = useState([
@@ -147,21 +19,59 @@ const Board = () => {
       balance: 1500.0,
       properties: [],
       side: 'bottom',
+      position: 0,
+    },
+    {
+      id: 'Player 2',
+      name: 'Player 2',
+      piece: 'Car',
+      balance: 1500.0,
+      properties: [],
+      side: 'left',
+      position: 0,
+    },
+    {
+      id: 'Player 3',
+      name: 'Player 3',
+      piece: 'Dog',
+      balance: 1500.0,
+      properties: [],
+      side: 'top',
+      position: 0,
+    },
+    {
+      id: 'Player 4',
+      name: 'Player 4',
+      piece: 'Hat',
+      balance: 1500.0,
+      properties: [],
+      side: 'right',
+      position: 0,
     },
   ]);
+  const [currentPlayer, setCurrentPlayer] = useState('Player 1');
 
   const handlePropertyClick = (name) => {
     setSelectedProperty(name);
   };
 
-  const handleDiceRoll = (values) => {
-    const total = values[0] + values[1];
-    setPlayerPosition((prev) => (prev + total) % 40);
+  const nextTurn = () => {
+    const currentIndex = players.findIndex((p) => p.id === currentPlayer);
+    const nextIndex = (currentIndex + 1) % players.length;
+    setCurrentPlayer(players[nextIndex].id);
+  };
+
+  const handlePositionUpdate = (playerId, newPosition) => {
+    setPlayers((prev) =>
+      prev.map((p) =>
+        p.id === playerId ? { ...p, position: newPosition } : p
+      )
+    );
     setFlashTrigger(true);
   };
 
   const handleBuy = (playerId) => {
-    const currentProperty = properties[playerPosition];
+    const currentProperty = properties[players.find((p) => p.id === playerId).position];
     const player = players.find((p) => p.id === playerId);
     if (
       currentProperty.owner === null &&
@@ -170,7 +80,7 @@ const Board = () => {
     ) {
       setProperties((prev) =>
         prev.map((prop, index) =>
-          index === playerPosition ? { ...prop, owner: playerId } : prop
+          index === player.position ? { ...prop, owner: playerId } : prop
         )
       );
       setPlayers((prev) =>
@@ -185,7 +95,34 @@ const Board = () => {
         )
       );
       setFlashTrigger(true);
+      nextTurn();
     }
+  };
+
+  const handleOther = () => {
+    setFlashTrigger(true);
+    nextTurn();
+  };
+
+  const handlePass = () => {
+    setFlashTrigger(true);
+    nextTurn();
+  };
+
+  const getGroupedProperties = (properties) => {
+    const groups = {};
+    properties.forEach((prop) => {
+      if (prop.group && prop.group !== "railroad" && prop.group !== "utility") {
+        if (!groups[prop.group]) {
+          groups[prop.group] = [];
+        }
+        groups[prop.group].push(prop);
+      } else {
+        // Non-grouped properties (railroads, utilities, etc.) treated as individual groups
+        groups[prop.name] = [prop];
+      }
+    });
+    return Object.entries(groups).map(([group, props], index) => ({ group, props, index }));
   };
 
   const getCardPositionStyle = (side, index) => {
@@ -209,16 +146,23 @@ const Board = () => {
     }
   }, [flashTrigger]);
 
+  const currentPlayerObj = players.find((p) => p.id === currentPlayer);
+
   return (
     <div className="game-container">
       <div className="board">
         <div className="center">
+          Monopoly
           <Dice
-            onRoll={handleDiceRoll}
-            onBuy={() => handleBuy('Player 1')}
-            squareName={properties[playerPosition].name}
-            squarePrice={properties[playerPosition].price}
-            squareOwner={properties[playerPosition].owner}
+            onRoll={() => {}}
+            onPositionUpdate={handlePositionUpdate}
+            onBuy={() => handleBuy(currentPlayer)}
+            onPass={handlePass}
+            onOther={handleOther}
+            currentPlayerObj={currentPlayerObj}
+            currentPlayer={currentPlayer}
+            players={players}
+            properties={properties}
             triggerFlash={flashTrigger}
           />
         </div>
@@ -237,19 +181,28 @@ const Board = () => {
             />
           );
         })}
-        <Piece position={playerPosition} pieceType={players[0].piece} />
-        {players.map((player) =>
-          player.properties.map((prop, index) => (
+        {players.map((player) => (
+          <Piece
+            key={player.id}
+            position={player.position}
+            pieceType={player.piece}
+            playerId={player.id}
+          />
+        ))}
+        {players.map((player) => {
+          const groupedProperties = getGroupedProperties(player.properties);
+          return groupedProperties.map(({ group, props, index }) => (
             <div
-              key={`${player.id}-${prop.name}`}
+              key={`${player.id}-${group}`}
               className="property-card"
               style={getCardPositionStyle(player.side, index)}
             >
-              <div className={`color-bar ${prop.color}`}></div>
-              <span>{prop.name}</span>
+              <div className={`color-bar ${props[props.length - 1].color}`}></div>
+              <span>{props[props.length - 1].name}</span>
+              {props.length > 1 && <div className="stack-count">{props.length}</div>}
             </div>
-          ))
-        )}
+          ));
+        })}
       </div>
       <div className="sidebar">
         {players.map((player) => (
@@ -259,6 +212,7 @@ const Board = () => {
             piece={player.piece}
             balance={player.balance}
             properties={player.properties}
+            isCurrent={player.id === currentPlayer}
           />
         ))}
       </div>

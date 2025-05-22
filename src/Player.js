@@ -1,9 +1,9 @@
 // src/Player.js
 import React from 'react';
 
-const Player = ({ name, piece, balance, properties }) => {
+const Player = ({ name, piece, balance, properties, isCurrent }) => {
   return (
-    <div className="player-container">
+    <div className={`player-container ${isCurrent ? 'current' : ''}`}>
       <h3>{name}</h3>
       <p>Piece: {piece}</p>
       <p>Balance: ${balance.toFixed(2)}</p>
