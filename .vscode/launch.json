@@ -1,30 +1,42 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "type": "chrome",
-        "request": "launch",
-        "name": "Launch Chrome against localhost",
-        "url": "http://localhost:3000",
-        "webRoot": "${workspaceFolder}/src",
-        "smartStep": true,
-        "sourceMapPathOverrides": {
-          "webpack:///src/*": "${webRoot}/src/*",
-          "webpack:///./~/*": "${workspaceFolder}/node_modules/*"
-        },
-"skipFiles": [
-  "<node_internals>/**",
-  "**/node_modules/**",
-  "**/proxy.js",
-  "**/prepareInjection.js",
-  "**/profilingHooks.js",
-  "**/react-dev-utils/**",
-  "**/react-refresh/**",
-   "**/react*/**/*.js",
-  "**/webpackHotDevClient.js"
-]
-
-      }
-    ]
-  }
-  
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Launch Chrome against localhost",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/src",
+      "smartStep": true,
+      "sourceMapPathOverrides": {
+        "webpack:///src/*": "${webRoot}/src/*",
+        "webpack:///./~/*": "${workspaceFolder}/node_modules/*"
+      },
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**",
+        "**/proxy.js",
+        "**/prepareInjection.js",
+        "**/profilingHooks.js",
+        "**/react-dev-utils/**",
+        "**/react-refresh/**",
+        "**/react*/**/*.js",
+        "**/webpackHotDevClient.js"
+      ]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Jest Tests",
+      "program": "${workspaceFolder}/node_modules/jest/bin/jest.js",
+      "args": [
+        "--runInBand"
+      ],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}
