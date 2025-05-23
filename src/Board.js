@@ -7,6 +7,11 @@ import Piece from './Piece';
 import Player from './Player';
 import { properties as initialProperties } from './properties';
 
+const GO_TO_JAIL_POS = 30;
+const JAIL_POS = 10;
+const COMMUNITY_CHEST_POSITIONS = [2, 17];
+const CHANCE_POSITIONS = [7, 22];
+
 const Board = () => {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [flashTrigger, setFlashTrigger] = useState(false);
@@ -20,7 +25,7 @@ const Board = () => {
       id: 'Player 1',
       name: 'Player 1',
       piece: 'Thimble',
-      balance: 15000000.0,
+      balance: 1500.00,
       properties: [
         { ...initialProperties[11], owner: 'Player 1', numHouses: 1 },
         { ...initialProperties[13], owner: 'Player 1', numHouses: 2 },
@@ -38,6 +43,9 @@ const Board = () => {
       properties: [],
       side: 'left',
       position: 0,
+    inJail: false,
+    jailTurns: 0,
+    getOutOfJailFree: 0,      
     },
     {
       id: 'Player 3',
@@ -47,6 +55,9 @@ const Board = () => {
       properties: [],
       side: 'top',
       position: 0,
+    inJail: false,
+    jailTurns: 0,
+    getOutOfJailFree: 0,      
     },
     {
       id: 'Player 4',
@@ -56,10 +67,63 @@ const Board = () => {
       properties: [],
       side: 'right',
       position: 0,
+    inJail: false,
+    jailTurns: 0,
+    getOutOfJailFree: 0,      
     },
   ]);
   const [currentPlayer, setCurrentPlayer] = useState('Player 1');
+  const [cardModal, setCardModal] = useState({show:false, text:'', type:''});
 
+
+const CHANCE_CARDS = [
+  { text: "Advance to GO (Collect $200)", action: "move", target: 0, money: 200 },
+  { text: "Go to Jail", action: "jail" },
+  { text: "Pay poor tax of $15", action: "pay", amount: 15 },
+  { text: "Collect $150", action: "collect", amount: 150 },
+  { text: "Get out of jail free", action: "getoutofjailfree", amount:0 },
+];
+
+const COMMUNITY_CARDS = [
+  { text: "Bank error in your favor. Collect $200", action: "collect", amount: 200 },
+  { text: "Doctor's fees. Pay $50", action: "pay", amount: 50 },
+  { text: "Go to jail", action: "jail" },
+  { text: "Collect $100", action: "collect", amount: 100 },
+  { text: "Get out of jail free", action: "getoutofjailfree", amount:0 },
+];
+  function drawCard(type, playerId) {
+    const cards = type === 'chance' ? CHANCE_CARDS : COMMUNITY_CARDS;
+   const card = cards[Math.floor(Math.random() * cards.length)];   
+setCardModal({ show: true, text: card.text, type: type });
+setTimeout(() => {
+  setCardModal({ show: false, text: '' });
+  if (card.action === "move") {
+    handlePositionUpdate(playerId, card.target);
+  } else if (card.action === "jail") {
+    handlePositionUpdate(playerId, GO_TO_JAIL_POS);
+  } else if (card.action === "pay") {
+    setPlayers(prev =>
+      prev.map(p =>
+        p.id === playerId ? { ...p, balance: p.balance - card.amount } : p
+      )
+    );
+  } else if (card.action === "collect") {
+    setPlayers(prev =>
+      prev.map(p =>
+        p.id === playerId ? { ...p, balance: p.balance + card.amount } : p
+      )
+    );
+  } else if (card.action === "getoutofjailfree") {
+    setPlayers(prev =>
+      prev.map(p =>
+        p.id === playerId ? { ...p, getOutOfJailFree: p.getOutOfJailFree + 1 } : p
+      )
+    );
+  }
+},2000);
+
+
+  }
   const canBuyHouse = (player, group) => {
     const groupProps = properties.filter(p => p.group === group && p.owner === player.id);
     //return groupProps.length === properties.filter(p => p.group === group).length;
@@ -87,17 +151,6 @@ const Board = () => {
   const houseCost = nextProp.houseCost || 100;
   if (nextProp.numHouses < 4 && player.balance >= houseCost) {
     console.log('Buying house for', nextProp.name);
-
-    // setProperties(prev =>
-    //   prev.map((prop, idx) =>
-    //     prop.name.trim().toLowerCase() === nextProp.name.trim().toLowerCase()
-    //       ? { ...prop, numHouses: prop.numHouses + 1 }
-    //       : prop
-    //   )
-    // );
-    console.log('Updating properties:', properties);
-    // console.log('Updating prop:', prop);
-    console.log('Updating neprop:', nextProp);
     setProperties(prev =>
       prev.map(prop =>
         prop.name === nextProp.name
@@ -115,26 +168,6 @@ const Board = () => {
   }
 };
 
-  // const handleBuyHouse = (playerId, group) => {
-  //   const player = players.find(p => p.id === playerId);
-  //   if (!canBuyHouse(player, group)) return;
-  //   const nextProp = getNextHouseProperty(group);
-  //   const houseCost = nextProp.housecost || 100;
-  //   if (nextProp && nextProp.houses < 4 && player.balance >= houseCost) {
-  //     setProperties(prev =>
-  //       prev.map((prop, idx) =>
-  //         prop.name === nextProp.name ? { ...prop, houses: prop.houses + 1 } : prop
-  //       )
-  //     );
-  //     setPlayers(prev =>
-  //       prev.map(p =>
-  //         p.id === playerId ? { ...p, balance: p.balance - houseCost } : p
-  //       )
-  //     );
-  //     setFlashTrigger(true);
-  //   }
-  // };
-
   const handlePropertyClick = (name) => {
     setSelectedProperty(name);
   };
@@ -145,14 +178,135 @@ const Board = () => {
     setCurrentPlayer(players[nextIndex].id);
   };
 
-  const handlePositionUpdate = (playerId, newPosition) => {
+  const handlePositionUpdate = (playerId, newPosition, rolledDoubles = false) => {
+  const player = players.find(p => p.id === playerId);
+
+    const prevPosition = player.position;
+
+  // Check if player passed GO
+  let passedGo = false;
+  if (newPosition < prevPosition) {
+
+      setPlayers(prev =>
+    prev.map(p =>
+      p.id === playerId
+        ? {
+            ...p,
+            position: newPosition,
+            balance: passedGo ? p.balance + 200 : p.balance
+          }
+        : p
+    )
+  );
+
+  }
+
+  // If player is in jail
+  if (player.inJail) {
+    if (rolledDoubles) {
+      // Let them out of jail and move
+      setPlayers(prev =>
+        prev.map(p =>
+          p.id === playerId
+            ? { ...p, inJail: false, jailTurns: 0, position: newPosition }
+            : p
+        )
+      );
+      setFlashTrigger(true);
+    } else if (player.jailTurns < 2) {
+      // Increment jailTurns, don't move
+      setPlayers(prev =>
+        prev.map(p =>
+          p.id === playerId
+            ? { ...p, jailTurns: p.jailTurns + 1 }
+            : p
+        )
+      );
+      // nextTurn();
+      setFlashTrigger(true);
+      // Optionally show a message: "You did not roll doubles."
+    } else {
+      // 3rd failed attempt, let them out and move
+      setPlayers(prev =>
+        prev.map(p =>
+          p.id === playerId
+            ? { ...p, inJail: false, jailTurns: 0, position: newPosition }
+            : p
+        )
+      );
+      setFlashTrigger(true);
+    }
+    return;
+  }
+  if (newPosition === GO_TO_JAIL_POS) {
+    setPlayers(prev =>
+      prev.map(p =>
+        p.id === playerId
+          ? { ...p, position: JAIL_POS, inJail: true, jailTurns: 0 }
+          : p
+      )
+    );    
+        setFlashTrigger(true);
+    return;
+  }
+  if (COMMUNITY_CHEST_POSITIONS.includes(newPosition)) {
+    drawCard('community', playerId);
+    //return;
+  }
+      if (CHANCE_POSITIONS.includes(newPosition)) {
+    drawCard('chance', playerId);
+    //return;
+  }
     setPlayers((prev) =>
       prev.map((p) =>
         p.id === playerId ? { ...p, position: newPosition } : p
       )
     );
+    const property = properties[newPosition];
+    handlePayRent(playerId, property);
     setFlashTrigger(true);
   };
+
+  const handlePayRent = (playerId, property) => {
+  if (property.owner && property.owner !== playerId) {
+    const rent = property.rent[property.numHouses] || 50; // Use property.rent or a default value
+    setPlayers(prev =>
+      prev.map(p => {
+        if (p.id === playerId) {
+          return { ...p, balance: p.balance - rent };
+        }
+        if (p.id === property.owner) {
+          return { ...p, balance: p.balance + rent };
+        }
+        return p;
+      })
+    );
+  }
+};
+
+const handlePayJail = (playerId) => {
+  setPlayers(prev =>
+    prev.map(p =>
+      p.id === playerId && p.inJail && p.balance >= 50
+        ? { ...p, balance: p.balance - 50, inJail: false, jailTurns: 0 }
+        : p
+    )
+    
+  );
+
+  nextTurn();
+};
+
+const handleUseJailCard = (playerId) => {
+  setPlayers(prev =>
+    prev.map(p =>
+      p.id === playerId && p.inJail && p.getOutOfJailFree > 0
+        ? { ...p, inJail: false, jailTurns: 0, getOutOfJailFree: p.getOutOfJailFree - 1 }
+        : p
+    )
+  );
+  nextTurn();
+};
 
   const handleBuy = (playerId) => {
     const currentProperty = properties[players.find((p) => p.id === playerId).position];
@@ -235,7 +389,11 @@ const Board = () => {
     <div className="game-container">
       <div className="board">
         <div className="center">
-          Monopoly
+          {cardModal.show && (
+  <div className={`card-modal ${cardModal.type}`}>
+    <div className="card-content">{cardModal.text}</div>
+  </div>
+)}
           <Dice
             onRoll={() => {}}
             onPositionUpdate={handlePositionUpdate}
@@ -248,6 +406,8 @@ const Board = () => {
             players={players}
             properties={properties}
             triggerFlash={flashTrigger}
+          onPayJail={handlePayJail}
+          onUseJailCard={handleUseJailCard}            
           />
         </div>
         {properties.map((prop) => {
@@ -280,7 +440,7 @@ const Board = () => {
             return props.map((prop, propertyIndex) => (
               <div
                 key={`${player.id}-${group}-${prop.name}`}
-                className="property-card"
+                className={`property-card ${player.side}`}
                 style={{
                   ...getCardPositionStyle(player.side, groupIndex),
                   top: player.side === 'left' || player.side === 'right'
@@ -301,7 +461,7 @@ const Board = () => {
                 )}
                 {prop.houses > 0 && (
                   <div className="house-count">{prop.houses}</div>
-                )}
+                )}                
               </div>
             ));
           });
@@ -320,6 +480,7 @@ const Board = () => {
         ))}
       </div>
     </div>
+    
   );
 };
 

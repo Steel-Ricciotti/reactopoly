@@ -14,6 +14,8 @@ const Dice = ({
   players,
   properties,
   triggerFlash,
+  onPayJail,
+  onUseJailCard,
 }) => {
   const [diceValues, setDiceValues] = useState([1, 1]);
   const [isRolling, setIsRolling] = useState(false);
@@ -35,6 +37,7 @@ const Dice = ({
       const newValues = [
         Math.floor(Math.random() * 6) + 1,
         Math.floor(Math.random() * 6) + 1,
+        1,6
       ];
       setDiceValues(newValues);
       setIsRolling(false);
@@ -42,6 +45,9 @@ const Dice = ({
       const total = newValues[0] + newValues[1];
       const newPosition = (currentPlayerObj.position + total) % 40;
       onPositionUpdate(currentPlayerObj.id, newPosition);
+      const currentSquare = properties[newPosition];
+      //Dont move if player is in jail
+      if(!currentPlayerObj.inJail) {
       const currentSquare = properties[newPosition];
       setFlashState('current');
       setFlashMessage(
@@ -51,7 +57,14 @@ const Dice = ({
       );
       const needsAction = currentSquare.owner === null && currentSquare.price !== undefined && currentSquare.type === 'property';
       setShowButtons(needsAction);
-      setWaitingForAction(needsAction);
+      setWaitingForAction(needsAction);      
+      }
+      else{
+        const currentSquare = properties[currentPlayerObj.position];
+        setFlashState('current');
+      }
+
+
     }, 1000);
   };
 
@@ -135,6 +148,20 @@ const Dice = ({
              )}            
           </div>
         )}
+        {/* /Logic if player is in jail */}
+          {currentPlayerObj.inJail && (
+            <div className="jail-actions">
+              <button onClick={() => onPayJail(currentPlayerObj.id)} disabled={isRolling}>
+                Pay $50 to get out of Jail
+              </button>
+              {currentPlayerObj.getOutOfJailFree > 0 && (
+                <button onClick={() => onUseJailCard(currentPlayerObj.id)} disabled={isRolling}>
+                  Play Get Out of Jail Free
+                </button>
+              )}
+            </div>
+          )}
+          
         {!showButtons && flashState === 'current' && properties[currentPlayerObj.position].owner !== null && properties[currentPlayerObj.position].price !== undefined && (
           <div className={`pay-rent ${triggerFlash ? 'flashing' : ''}`}>
             Pay Rent

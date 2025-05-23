@@ -236,6 +236,19 @@ body {
   padding: 5px;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 }
+/* .property-card.top {
+  top:10px;
+} */
+.property-card.left {
+      bottom:200px;
+}
+.property-card.right {
+      top:100px;
+}
+.property-card.bottom {
+    top:625px;
+}
+
 .property-card .color-bar {
   width: 100%;
   height: 10px;
@@ -255,7 +268,7 @@ body {
   text-align: center;
 }
 .property-wrapper {
-  position: relative;
+  position: absolute;
 }
 
 .house-buy-container {
@@ -301,12 +314,15 @@ body {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 12px;
+  font-size: 9px;
   cursor: pointer;
   background-color: #fff;
   position: relative;
+  width: 54px;   /* Set to your desired width */
+  height: 54px;  /* Set to your desired height */
+  box-sizing: border-box;
+  overflow: hidden;
 }
-
 .house {
   position: absolute;
   width: 10px;
@@ -363,7 +379,7 @@ body {
 .top-row .house-3 { top: 42px; left: 20px; }
 .top-row .house-4 { top: 42px; left: 30px; }
 
-}
+
 .bottom-row .house-1 { bottom: 40px; left: 4px; }
 .bottom-row .house-2 { bottom: 40px; left: 16px; }
 .bottom-row .house-3 { bottom: 40px; left: 28px; }
@@ -381,3 +397,27 @@ body {
 .right-column .house-3 { right: 60px; top: 28px; }
 .right-column .house-4 { right: 60px; top: 40px; }
 
+
+.card-modal {
+  position: relative;
+  top: 180px;
+  left: 35%;
+  transform: translate(-50%, -50%);
+  background: #fffbe6;
+  border: 2px solid #333;
+  padding: 32px 48px;
+  z-index: 1000;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+}
+.chance{
+background: #d19617;
+}
+.community{
+  background: #e9ec17;
+}
+.card-content {
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: center;
+}

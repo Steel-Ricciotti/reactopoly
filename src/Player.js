@@ -2,6 +2,7 @@
 import React from 'react';
 
 const Player = ({ name, piece, balance, properties, isCurrent }) => {
+  console.log(balance);
   return (
     <div className={`player-container ${isCurrent ? 'current' : ''}`}>
       <h3>{name}</h3>
