@@ -32,17 +32,7 @@ body {
   flex-direction: column;
   gap: 10px;
 }
-.property {
-  border: 1px solid #000;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  font-size: 12px;
-  cursor: pointer;
-  background-color: #fff;
-}
+
 .property:hover, .property.selected {
   background-color: #ffff99;
 }
@@ -212,6 +202,25 @@ body {
   50% { opacity: 0.5; background-color: rgba(255, 0, 0, 0.4); }
   100% { opacity: 1; background-color: rgba(255, 0, 0, 0.8); }
 }
+
+.player-container {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 10px;
+  border-radius: 8px;
+  text-align: center;
+  width: 200px;
+}
+.player-container.current {
+  border: 2px solid #4caf50;
+}
+.player-container h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.player-container p {
+  margin: 5px 0;
+  font-size: 14px;
+}
 .property-card {
   position: absolute;
   width: 60px;
@@ -231,24 +240,7 @@ body {
   width: 100%;
   height: 10px;
 }
-.player-container {
-  background-color: rgba(255, 255, 255, 0.9);
-  padding: 10px;
-  border-radius: 8px;
-  text-align: center;
-  width: 200px;
-}
-.player-container.current {
-  border: 2px solid #4caf50;
-}
-.player-container h3 {
-  margin: 0;
-  font-size: 16px;
-}
-.player-container p {
-  margin: 5px 0;
-  font-size: 14px;
-}
+
 .house-count {
   position: absolute;
   bottom: 5px;
@@ -265,13 +257,7 @@ body {
 .property-wrapper {
   position: relative;
 }
-.house {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: green;
-  border: 1px solid darkgreen;
-}
+
 .house-buy-container {
   margin-top: 10px;
   padding: 10px;
@@ -295,3 +281,103 @@ body {
   background: #6c757d;
   cursor: not-allowed;
 }
+.stack-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  font-size: 12px;
+}
+.property {
+  border: 1px solid #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 12px;
+  cursor: pointer;
+  background-color: #fff;
+  position: relative;
+}
+
+.house {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: green;
+  border: 1px solid black;
+}
+
+.property.top-row .hotel {
+  top: 40px;
+  left: 20px;
+  width: 40px;
+  height: 10px;
+  position: absolute;
+  background: red;
+  border: 1px solid darkred;
+  z-index: 2;
+}
+
+.property.bottom-row .hotel {
+  bottom: 40px;
+  left: 23px;
+  width: 40px;
+  height: 10px;
+  position: absolute;
+  background: red;
+  border: 1px solid darkred;
+  z-index: 2;
+}
+
+.property.left-column .hotel {
+  top: 30px;
+  left: 60px;
+  width: 10px;
+  height: 40px;
+  position: absolute;
+  background: red;
+  border: 1px solid darkred;
+  z-index: 2;
+}
+
+.property.right-column .hotel {
+  top: 30px;
+  right: 60px;
+  width: 10px;
+  height: 40px;
+  position: absolute;
+  background: red;
+  border: 1px solid darkred;
+  z-index: 2;
+}
+.top-row .house-1 { top: 42px; left: 0px; }
+.top-row .house-2 { top: 42px; left: 10px; }
+.top-row .house-3 { top: 42px; left: 20px; }
+.top-row .house-4 { top: 42px; left: 30px; }
+
+}
+.bottom-row .house-1 { bottom: 40px; left: 4px; }
+.bottom-row .house-2 { bottom: 40px; left: 16px; }
+.bottom-row .house-3 { bottom: 40px; left: 28px; }
+.bottom-row .house-4 { bottom: 40px; left: 40px; }
+
+
+.left-column .house-1 { left: 60px; top: 4px; }
+.left-column .house-2 { left: 60px; top: 16px; }
+.left-column .house-3 { left: 60px; top: 28px; }
+.left-column .house-4 { left: 60px; top: 40px; }
+
+
+.right-column .house-1 { right: 60px; top: 4px; }
+.right-column .house-2 { right: 60px; top: 16px; }
+.right-column .house-3 { right: 60px; top: 28px; }
+.right-column .house-4 { right: 60px; top: 40px; }
+
