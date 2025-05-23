@@ -5,6 +5,7 @@
 /.pnp
 .pnp.js
 
+
 # testing
 /coverage
 
@@ -21,3 +22,55 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+#Pychache
+backend/app/schemas/__pycache__
+backend/app/crud/__pycache__
+backend/app/api/__pycache__
+backend/app/models/__pycache__
+backend/app/__pycache__
+# Python virtual environment
+venv/
+.env
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# SQLite database
+monopoly.db
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# React build
+frontend/build/
+frontend/.cache/
+frontend/dist/
+
+# Environment files
+backend/.env
+frontend/.env
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
