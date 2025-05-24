@@ -1,3 +1,4 @@
+
 // src/Board.js
 import React, { useState, useEffect } from 'react';
 import Property from './Property';
@@ -10,13 +11,17 @@ import { properties as initialProperties } from './properties';
 const GO_TO_JAIL_POS = 30;
 const JAIL_POS = 10;
 const COMMUNITY_CHEST_POSITIONS = [2, 17];
-const CHANCE_POSITIONS = [7, 22];
-
+const CHANCE_POSITIONS = [7, 22,36];
 
 const Board = () => {
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [flashTrigger, setFlashTrigger] = useState(false);
   const [showBuyHouseModal, setShowBuyHouseModal] = useState(false);
+  const [showStartMenu, setShowStartMenu] = useState(true);
+  const [numPlayers, setNumPlayers] = useState(2);
+  const [playerSelections, setPlayerSelections] = useState(Array(2).fill(null));
+  const [currentConfigPlayer, setCurrentConfigPlayer] = useState(-1); // Start at main menu
+  const pieceOptions = ['Thimble', 'Car', 'Dog', 'Hat'];
   const [properties, setProperties] = useState(
     initialProperties.map(prop => ({
       ...prop,
@@ -24,7 +29,21 @@ const Board = () => {
       houseCost: prop.group === 'purple' ? 50 : 100,
     }))
   );
-  const [players, setPlayers] = useState([
+  // const [players, setPlayers] = useState([]);
+
+  
+
+
+
+
+
+
+
+
+
+
+
+    const [players, setPlayers] = useState([
     {
       id: 'Player 1',
       name: 'Player 1',
@@ -103,6 +122,20 @@ const Board = () => {
       getOutOfJailFree: 0,
     },
   ]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const [currentPlayer, setCurrentPlayer] = useState('Player 1');
   const [cardModal, setCardModal] = useState({ show: false, text: '', type: '' });
 
@@ -154,28 +187,17 @@ const Board = () => {
     }, 2000);
   }
 
-  // Find all groups where the current player can buy houses
   const getEligibleHouseGroups = (player) => {
     const groups = {};
     properties.forEach(prop => {
-      if (
-        prop.group &&
-        prop.group !== 'railroad' &&
-        prop.group !== 'utility'
-      ) {
+      if (prop.group && prop.group !== 'railroad' && prop.group !== 'utility') {
         if (!groups[prop.group]) groups[prop.group] = [];
         groups[prop.group].push(prop);
       }
     });
-    // Only include groups where player owns all properties
     return Object.entries(groups)
-      .filter(([group, props]) =>
-        props.every(p => p.owner === player.id)
-      )
-      .map(([group, props]) => ({
-        group,
-        props,
-      }));
+      .filter(([group, props]) => props.every(p => p.owner === player.id))
+      .map(([group, props]) => ({ group, props }));
   };
 
   const canBuyHouse = (player, group) => {
@@ -239,7 +261,7 @@ const Board = () => {
   const handlePositionUpdate = (playerId, newPosition, rolledDoubles = false) => {
     const player = players.find(p => p.id === playerId);
     const prevPosition = player.position;
-    let passedGo = newPosition < prevPosition;
+    let passedGo = newPosition < prevPosition || newPosition === 0;
 
     if (player.inJail) {
       if (rolledDoubles) {
@@ -417,32 +439,58 @@ const Board = () => {
       case 'left':
         return {
           ...baseStyle,
-          // left: '-90px',
           left: `${-100 - propertyIndex * 20}px`,
-          top: `${10 + index * 80 }px`,
-          transform: 'rotate(90deg)',
+          top: `${10 + index * 80}px`,
         };
       case 'top':
         return {
           ...baseStyle,
-          left: `${10 + index * 80}px `,
+          left: `${10 + index * 80}px`,
           top: `${-110 - propertyIndex * 20}px`,
-          transform: 'rotate(180deg)',
-          
         };
       case 'right':
         return {
           ...baseStyle,
           right: `${-100 - propertyIndex * 20}px`,
-          top: `${10 + index * 80 }px`,
-          transform: 'rotate(270deg)',
+          top: `${10 + index * 80}px`,
         };
       default:
         return {
           ...baseStyle,
-          left: `${10 + index * 50}px`,
-          bottom: `${-85 - propertyIndex * 20}px`,
+          left: `${10 + index * 80}px`,
+          bottom: `${-110 - propertyIndex * 20}px`,
         };
+    }
+  };
+
+  const handleStartNewGame = () => {
+    setPlayerSelections(Array(numPlayers).fill(null));
+    setCurrentConfigPlayer(0); // Start piece selection
+  };
+
+  const handlePieceSelect = (piece) => {
+    const updated = [...playerSelections];
+    updated[currentConfigPlayer] = piece;
+    setPlayerSelections(updated);
+
+    if (currentConfigPlayer < numPlayers - 1) {
+      setCurrentConfigPlayer(currentConfigPlayer + 1);
+    } else {
+      const sides = ['bottom', 'left', 'top', 'right'];
+      setPlayers(updated.map((piece, idx) => ({
+        id: `Player ${idx + 1}`,
+        name: `Player ${idx + 1}`,
+        piece,
+        position: 0,
+        balance: 1500,
+        properties: [],
+        side: sides[idx] || 'bottom',
+        inJail: false,
+        jailTurns: 0,
+        getOutOfJailFree: 0,
+      })));
+      setCurrentPlayer('Player 1');
+      setShowStartMenu(false);
     }
   };
 
@@ -452,232 +500,202 @@ const Board = () => {
     }
   }, [flashTrigger]);
 
-  const currentPlayerObj = players.find(p => p.id === currentPlayer);
-
-  // return (
-  //   <div className="game-container">
-      
-  //     <div className="board">
-  //       <div className="center">
-  //         {cardModal.show && (
-  //           <div className={`card-modal ${cardModal.type}`}>
-  //             <div className="card-content">{cardModal.text}</div>
-  //           </div>
-  //         )}
-  //         <Dice
-  //           onRoll={() => {}}
-  //           onPositionUpdate={handlePositionUpdate}
-  //           onBuy={() => handleBuy(currentPlayer)}
-  //           onPass={handlePass}
-  //           onOther={handleOther}
-  //           onBuyHouse={handleBuyHouse}
-  //           currentPlayerObj={currentPlayerObj}
-  //           currentPlayer={currentPlayer}
-  //           players={players}
-  //           properties={properties}
-  //           triggerFlash={flashTrigger}
-  //           onPayJail={handlePayJail}
-  //           onUseJailCard={handleUseJailCard}
-  //         />
-  //       </div>
-  //       {properties.map(prop => {
-  //         if (prop.type === 'corner') {
-  //           return <Corner key={prop.name} name={prop.name} pos={prop.pos} />;
-  //         }
-  //         return (
-  //           <Property
-  //             key={prop.name}
-  //             name={prop.name}
-  //             color={prop.color}
-  //             pos={prop.pos}
-  //             numHouses={prop.numHouses}
-  //             isSelected={selectedProperty === prop.name}
-  //             onClick={() => handlePropertyClick(prop.name)}
-  //           />
-  //         );
-  //       })}
-  //       {players.map(player => (
-  //         <Piece
-  //           key={player.id}
-  //           position={player.position}
-  //           pieceType={player.piece}
-  //           playerId={player.id}
-  //         />
-  //       ))}
-  //       {players.map(player => {
-  //         const groupedProperties = getGroupedProperties(player.properties);
-  //         return groupedProperties.map(({ group, props }, groupIndex) =>
-  //           props.map((prop, propertyIndex) => (
-  //             <div
-  //               key={`${player.id}-${group}-${prop.name}`}
-  //               className="card"
-  //               style={getCardPositionStyle(player.side, groupIndex, propertyIndex)}
-  //               data-testid="card"
-  //             >
-  //               <div className={`color-bar ${prop.color}`}></div>
-  //               <span>{prop.name}</span>
-  //               {propertyIndex === 0 && props.length > 1 && (
-  //                 <div className="stack-count">{props.length}</div>
-  //               )}
-  //               {prop.numHouses > 0 && (
-  //                 <div className="house-count">{prop.numHouses}</div>
-  //               )}
-  //             </div>
-  //           ))
-  //         );
-  //       })}
-  //     </div>
-  //     <div className="sidebar">
-  //       {players.map(player => (
-  //         <Player
-  //           key={player.id}
-  //           name={player.name}
-  //           piece={player.piece}
-  //           balance={player.balance}
-  //           properties={player.properties}
-  //           isCurrent={player.id === currentPlayer}
-  //         />
-  //       ))}
-        
-  //     </div>
-  //   </div>
-  // );
-
-  return (
-  <div className="game-container">
-    <div className="board">
-      <div className="center">
-        {cardModal.show && (
-          <div className={`card-modal ${cardModal.type}`}>
-            <div className="card-content">{cardModal.text}</div>
-          </div>
-        )}
-        <Dice
-          onRoll={() => {}}
-          onPositionUpdate={handlePositionUpdate}
-          onBuy={() => handleBuy(currentPlayer)}
-          onPass={handlePass}
-          onOther={handleOther}
-          onBuyHouse={handleBuyHouse}
-          currentPlayerObj={currentPlayerObj}
-          currentPlayer={currentPlayer}
-          players={players}
-          properties={properties}
-          triggerFlash={flashTrigger}
-          onPayJail={handlePayJail}
-          onUseJailCard={handleUseJailCard}
-        />
-      </div>
-      {properties.map(prop => {
-        if (prop.type === 'corner') {
-          return <Corner key={prop.name} name={prop.name} pos={prop.pos} />;
-        }
-        return (
-          <Property
-            key={prop.name}
-            name={prop.name}
-            color={prop.color}
-            pos={prop.pos}
-            numHouses={prop.numHouses}
-            isSelected={selectedProperty === prop.name}
-            onClick={() => handlePropertyClick(prop.name)}
-          />
-        );
-      })}
-      {players.map(player => (
-        <Piece
-          key={player.id}
-          position={player.position}
-          pieceType={player.piece}
-          playerId={player.id}
-        />
-      ))}
-      {players.map(player => {
-        const groupedProperties = getGroupedProperties(player.properties);
-        return groupedProperties.map(({ group, props }, groupIndex) =>
-          props.map((prop, propertyIndex) => (
-            <div
-              key={`${player.id}-${group}-${prop.name}`}
-              className="card"
-              style={getCardPositionStyle(player.side, groupIndex, propertyIndex)}
-              data-testid="card"
-            >
-              <div className={`color-bar ${prop.color}`}></div>
-              <span>{prop.name}</span>
-              {propertyIndex === 0 && props.length > 1 && (
-                <div className="stack-count">{props.length}</div>
-              )}
-              {prop.numHouses > 0 && (
-                <div className="house-count">{prop.numHouses}</div>
-              )}
-            </div>
-          ))
-        );
-      })}
-    </div>
-    <div className="sidebar">
-      {players.map(player => (
-        <Player
-          key={player.id}
-          name={player.name}
-          piece={player.piece}
-          balance={player.balance}
-          properties={player.properties}
-          isCurrent={player.id === currentPlayer}
-        />
-      ))}
-      {/* Buy Houses Button */}
-      {getEligibleHouseGroups(currentPlayerObj).length > 0 && (
-        <button
-          style={{ marginTop: 20, width: '100%' }}
-          onClick={() => setShowBuyHouseModal(true)}
-        >
-          Buy Houses
-        </button>
-      )}
-    </div>
-    {/* Buy House Modal */}
-    {showBuyHouseModal && (
+  if (showStartMenu) {
+    return (
       <div className="modal-overlay">
-        <div className="modal buy-house-modal">
-          <h3>Buy Houses</h3>
-          <button
-            style={{ float: 'right', marginBottom: 10 }}
-            onClick={() => setShowBuyHouseModal(false)}
-          >
-            Exit
-          </button>
-          <div>
-            {getEligibleHouseGroups(currentPlayerObj).map(({ group, props }) => (
-              <div
-                key={group}
-                className="buy-house-group"
-                style={{
-                  border: '1px solid #ccc',
-                  margin: '10px 0',
-                  padding: 10,
-                  cursor: 'pointer',
-                }}
-                onClick={() => {
-                  handleBuyHouse(currentPlayerObj.id, group);
-                }}
-              >
-                <strong style={{ color: props[0].color }}>{group.toUpperCase()}</strong>
-                <div>
-                  {props.map(p => (
-                    <span key={p.name} style={{ marginRight: 8 }}>
-                      {p.name} (Houses: {p.numHouses})
-                    </span>
+        <div className="modal">
+          {currentConfigPlayer >= 0 ? (
+            <>
+              <h3>Player {currentConfigPlayer + 1}: Choose Your Piece</h3>
+              <div style={{ display: 'flex', gap: 16 }}>
+                {pieceOptions
+                  .filter(opt => !playerSelections.includes(opt))
+                  .map(opt => (
+                    <button
+                      key={opt}
+                      className="modal-button"
+                      onClick={() => handlePieceSelect(opt)}
+                    >
+                      {opt}
+                    </button>
                   ))}
-                </div>
               </div>
-            ))}
-          </div>
+            </>
+          ) : (
+            <>
+
+              <div style={{ marginTop: 20 }}>
+                <label>
+                  Number of Players:
+                  <select
+                    value={numPlayers}
+                    onChange={e => setNumPlayers(Number(e.target.value))}
+                  >
+                    {[1,2, 3, 4].map(n => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <button
+                className="modal-button"
+                onClick={handleStartNewGame}
+              >
+                New Game
+              </button>
+              <button className="modal-button" onClick={() => {}}>
+                Load Game
+              </button>
+              <button className="modal-button" onClick={() => {}}>
+                Settings
+              </button>
+              <button className="modal-button" onClick={() => {}}>
+                Exit
+              </button>
+            </>
+          )}
         </div>
       </div>
-    )}
-  </div>
-);
+    );
+  }
+
+  if (!players.length) return null;
+
+  const currentPlayerObj = players.find(p => p.id === currentPlayer);
+
+  return (
+    <div className="game-container">
+      <div className="board">
+        <div className="center">
+          {cardModal.show && (
+            <div className={`card-modal ${cardModal.type}`}>
+              <div className="card-content">{cardModal.text}</div>
+            </div>
+          )}
+          <Dice
+            onRoll={() => {}}
+            onPositionUpdate={handlePositionUpdate}
+            onBuy={() => handleBuy(currentPlayer)}
+            onPass={handlePass}
+            onOther={handleOther}
+            onBuyHouse={handleBuyHouse}
+            currentPlayerObj={currentPlayerObj}
+            currentPlayer={currentPlayer}
+            players={players}
+            properties={properties}
+            triggerFlash={flashTrigger}
+            onPayJail={handlePayJail}
+            onUseJailCard={handleUseJailCard}
+          />
+        </div>
+        {properties.map(prop => {
+          if (prop.type === 'corner') {
+            return <Corner key={prop.name} name={prop.name} pos={prop.pos} />;
+          }
+          return (
+            <Property
+              key={prop.name}
+              name={prop.name}
+              color={prop.color}
+              pos={prop.pos}
+              numHouses={prop.numHouses}
+              isSelected={selectedProperty === prop.name}
+              onClick={() => handlePropertyClick(prop.name)}
+            />
+          );
+        })}
+        {players.map(player => (
+          <Piece
+            key={player.id}
+            position={player.position}
+            pieceType={player.piece}
+            playerId={player.id}
+          />
+        ))}
+        {players.map(player => {
+          const groupedProperties = getGroupedProperties(player.properties);
+          return groupedProperties.map(({ group, props }, groupIndex) =>
+            props.map((prop, propertyIndex) => (
+              <div
+                key={`${player.id}-${group}-${prop.name}`}
+                className={`card ${player.side}`}
+                style={getCardPositionStyle(player.side, groupIndex, propertyIndex)}
+                data-testid="card"
+              >
+                <div className={`color-bar ${prop.color}`}></div>
+                <span>{prop.name}</span>
+                {propertyIndex === 0 && props.length > 1 && (
+                  <div className="stack-count">{props.length}</div>
+                )}
+                {prop.numHouses > 0 && (
+                  <div className="house-count">{prop.numHouses}</div>
+                )}
+              </div>
+            ))
+          );
+        })}
+      </div>
+      <div className="sidebar">
+        {players.map(player => (
+          <Player
+            key={player.id}
+            name={player.name}
+            piece={player.piece}
+            balance={player.balance}
+            properties={player.properties}
+            isCurrent={player.id === currentPlayer}
+          />
+        ))}
+        {getEligibleHouseGroups(currentPlayerObj).length > 0 && (
+          <button
+            style={{ marginTop: 20, width: '100%' }}
+            onClick={() => setShowBuyHouseModal(true)}
+          >
+            Buy Houses
+          </button>
+        )}
+      </div>
+      {showBuyHouseModal && (
+        <div className="modal-overlay">
+          <div className="modal buy-house-modal">
+            <h3>Buy Houses</h3>
+            <button
+              style={{ float: 'right', marginBottom: 10 }}
+              onClick={() => setShowBuyHouseModal(false)}
+            >
+              Exit
+            </button>
+            <div>
+              {getEligibleHouseGroups(currentPlayerObj).map(({ group, props }) => (
+                <div
+                  key={group}
+                  className="buy-house-group"
+                  style={{
+                    border: '1px solid #ccc',
+                    margin: '10px 0',
+                    padding: 10,
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    handleBuyHouse(currentPlayerObj.id, group);
+                  }}
+                >
+                  <strong style={{ color: props[0].color }}>{group.toUpperCase()}</strong>
+                  <div>
+                    {props.map(p => (
+                      <span key={p.name} style={{ marginRight: 8 }}>
+                        {p.name} (Houses: {p.numHouses})
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Board;
