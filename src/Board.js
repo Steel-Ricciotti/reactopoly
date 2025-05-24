@@ -521,6 +521,9 @@ const Board = () => {
         { ...initialProperties[11], owner: 'Player 1', numHouses: 0 },
         { ...initialProperties[13], owner: 'Player 1', numHouses: 0 },
         { ...initialProperties[14], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[15], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[16], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[1], owner: 'Player 1', numHouses: 0 },
       ],
       side: 'bottom',
       position: 0,
@@ -537,6 +540,11 @@ const Board = () => {
         { ...initialProperties[11], owner: 'Player 1', numHouses: 0 },
         { ...initialProperties[13], owner: 'Player 1', numHouses: 0 },
         { ...initialProperties[14], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[15], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[16], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[17], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[18], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[1], owner: 'Player 1', numHouses: 0 },
       ],
       side: 'left',
       position: 0,
@@ -861,26 +869,31 @@ const Board = () => {
       case 'bottom':
         return {
           ...baseStyle,
-          left: `${10 + index * 50}px`,
+          left: `${10 + index * 80}px`,
           bottom: `${-110 - propertyIndex * 20}px`,
         };
       case 'left':
         return {
           ...baseStyle,
-          left: '-90px',
-          top: `${10 + index * 50 + propertyIndex * 20}px`,
+          // left: '-90px',
+          left: `${-100 - propertyIndex * 20}px`,
+          top: `${10 + index * 80 }px`,
+          transform: 'rotate(90deg)',
         };
       case 'top':
         return {
           ...baseStyle,
-          left: `${10 + index * 50}px`,
+          left: `${10 + index * 50}px `,
           top: `${-110 - propertyIndex * 20}px`,
+          transform: 'rotate(180deg)',
+          
         };
       case 'right':
         return {
           ...baseStyle,
-          right: '-90px',
-          top: `${10 + index * 50 + propertyIndex * 20}px`,
+          right: `${-100 - propertyIndex * 20}px`,
+          top: `${10 + index * 80 }px`,
+          transform: 'rotate(270deg)',
         };
       default:
         return {

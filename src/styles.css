@@ -24,7 +24,8 @@ body {
 }
 .sidebar {
   width: 220px;
-  margin-left: 20px;
+  height  : 450px;
+  margin-left: 160px;
   padding: 10px;
   background-color: #fff;
   border-radius: 8px;
@@ -461,4 +462,17 @@ body {
   font-size: 1.3rem;
   font-weight: bold;
   text-align: center;
+}
+
+.card.bottom {
+  transform: rotate(0deg); /* Default, no rotation */
+}
+.card.left {
+  transform: rotate(-90deg);
+}
+.card.top {
+  transform: rotate(180deg);
+}
+.card.right {
+  transform: rotate(90deg);
 }
