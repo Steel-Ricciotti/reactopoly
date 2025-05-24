@@ -1,9 +1,9 @@
 // src/properties.js
 export const properties = [
     {ID:1 , name: "Go", type: "corner", pos: [1, 11] },
-    {ID:2 , name: "Mediterranean Avenue",group:'lightpurple',owner:null,mortgaged: false,price:60, type: "property",numHouses:0, housecost:100, rent:[14,70,200,550,750,950], color: "brown", pos: [1, 10] },
+    {ID:2 , name: "Mediterranean Avenue",group:'lightpurple',owner:null,mortgaged: false,price:60, type: "property",numHouses:1, housecost:100, rent:[14,70,200,550,750,950], color: "brown", pos: [1, 10] },
     {ID:3 , name: "Community Chest1", type: "communitychest", pos: [1, 9] },
-    {ID:4 , name: "Baltic Avenue",group:'lightpurple', owner:null,mortgaged: false,price:65, type: "property",numHouses:0, housecost:100, rent:[14,70,200,550,750,950], color: "brown", pos: [1, 8] },
+    {ID:4 , name: "Baltic Avenue",group:'lightpurple', owner:null,mortgaged: false,price:65, type: "property",numHouses:5, housecost:100, rent:[14,70,200,550,750,950], color: "brown", pos: [1, 8] },
     {ID:5 , name: "Income Tax", type: "incometax", pos: [1, 7] },
     {ID:6 , name: "Reading Railroad",group:'railroad', owner:null,mortgaged: false,price:200,type: "property",numHouses:0, houseCost:100, rent:[14,70,200,550,750,950], pos: [1, 6] },
     {ID:7 , name: "Oriental Avenue", group:'lightblue', owner:null,mortgaged: false,price:120, type: "property",numHouses:0, housecost:100, rent:[14,70,200,550,750,950], color: "light-blue", pos: [1, 5] },
