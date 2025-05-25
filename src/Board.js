@@ -1,6 +1,7 @@
 
 // src/Board.js
 import React, { useState, useEffect } from 'react';
+import logo from './assets/logo.png';
 import Property from './Property';
 import Corner from './Corner';
 import Dice from './Dice';
@@ -21,7 +22,13 @@ const Board = () => {
   const [numPlayers, setNumPlayers] = useState(2);
   const [playerSelections, setPlayerSelections] = useState(Array(2).fill(null));
   const [currentConfigPlayer, setCurrentConfigPlayer] = useState(-1); // Start at main menu
-  const pieceOptions = ['Thimble', 'Car', 'Dog', 'Hat'];
+    const pieceOptions = [
+    { name: 'Thimble', symbol: '🧵' },
+    { name: 'Car', symbol: '🚗' },
+    { name: 'Dog', symbol: '🐶' },
+    { name: 'Hat', symbol: '🎩' },
+  ];
+
   const [properties, setProperties] = useState(
     initialProperties.map(prop => ({
       ...prop,
@@ -470,17 +477,17 @@ const Board = () => {
 
   const handlePieceSelect = (piece) => {
     const updated = [...playerSelections];
-    updated[currentConfigPlayer] = piece;
+    updated[currentConfigPlayer] = piece.symbol;
     setPlayerSelections(updated);
 
     if (currentConfigPlayer < numPlayers - 1) {
       setCurrentConfigPlayer(currentConfigPlayer + 1);
     } else {
       const sides = ['bottom', 'left', 'top', 'right'];
-      setPlayers(updated.map((piece, idx) => ({
+      setPlayers(updated.map((symbol, idx) => ({
         id: `Player ${idx + 1}`,
         name: `Player ${idx + 1}`,
-        piece,
+        piece:symbol,
         position: 0,
         balance: 1500,
         properties: [],
@@ -509,14 +516,14 @@ const Board = () => {
               <h3>Player {currentConfigPlayer + 1}: Choose Your Piece</h3>
               <div style={{ display: 'flex', gap: 16 }}>
                 {pieceOptions
-                  .filter(opt => !playerSelections.includes(opt))
+                  .filter(opt => !playerSelections.includes(opt.symbol))
                   .map(opt => (
                     <button
                       key={opt}
                       className="modal-button"
                       onClick={() => handlePieceSelect(opt)}
                     >
-                      {opt}
+                      {opt.symbol}
                     </button>
                   ))}
               </div>
@@ -524,19 +531,13 @@ const Board = () => {
           ) : (
             <>
 
-              <div style={{ marginTop: 20 }}>
-                <label>
-                  Number of Players:
-                  <select
-                    value={numPlayers}
-                    onChange={e => setNumPlayers(Number(e.target.value))}
-                  >
-                    {[1,2, 3, 4].map(n => (
-                      <option key={n} value={n}>{n}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
+            <div style={{ marginTop: -20, textAlign: 'center' }}>
+              <img
+                src={logo}
+                alt="Reactopoly Logo"
+                style={{ width: '300px', maxWidth: '100%' }}
+              />
+            </div>
               <button
                 className="modal-button"
                 onClick={handleStartNewGame}
@@ -552,10 +553,26 @@ const Board = () => {
               <button className="modal-button" onClick={() => {}}>
                 Exit
               </button>
+              <div style={{ marginTop: 20 ,textAlign: 'center'}}>
+                <label>
+                  Number of Players:
+                  <select
+                    value={numPlayers}
+                    onChange={e => setNumPlayers(Number(e.target.value))}
+                  >
+                    {[1,2, 3, 4].map(n => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>              
+
             </>
           )}
         </div>
+        
       </div>
+      
     );
   }
 
@@ -608,7 +625,7 @@ const Board = () => {
           <Piece
             key={player.id}
             position={player.position}
-            pieceType={player.piece}
+            pieceType={player.piece.name || player.piece}
             playerId={player.id}
           />
         ))}
