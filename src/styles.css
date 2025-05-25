@@ -1,14 +1,29 @@
 
 /* src/styles.css */
 body {
+  background-image: url('assets/Background.png');
+ background-size: 45%;
+background-color: #cac5c5;
+  background-position: center;
+  background-repeat: no-repeat;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   margin: 0;
-  background-color: #f0f0f0;
+
   font-family: Arial, sans-serif;
 }
+/* .board-container { */
+/* background-color:   #d4cece; */
+  /* height: 50vh; */
+  /* display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 20px; */
+/* } */
+
 .game-container {
   display: flex;
   position: relative;
@@ -19,13 +34,14 @@ body {
   border: 10px solid #000;
   background-color: #d3e8d3;
   display: grid;
+  left: 470px;
   grid-template: repeat(11, 1fr) / repeat(11, 1fr);
   position: relative;
 }
 .sidebar {
   width: 220px;
   height  : 450px;
-  margin-left: 160px;
+  margin-left: 700px;
   padding: 10px;
   background-color: #fff;
   border-radius: 8px;
@@ -440,10 +456,22 @@ body {
   right: 60px;
   top: 40px;
 }
-.card-modal {
+/* .card-modal {
   position: relative;
   top: 180px;
-  left: 35%;
+  left: 20%;
+  transform: translate(-50%, -50%);
+  background: #fffbe6;
+  border: 2px solid #333;
+  padding: 32px 48px;
+  z-index: 1000;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+} */
+ .card-modal {
+  position: relative;
+  top: 180px;
+  left: 50%;
   transform: translate(-50%, -50%);
   background: #fffbe6;
   border: 2px solid #333;
@@ -494,6 +522,7 @@ body {
   position: fixed;
   top: 0;
   left: 0;
+  right: 40px;
   width: 100%;
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
@@ -502,12 +531,55 @@ body {
   align-items: center;
   z-index: 1000;
 }
-.modal-button:hover {
-  background: #00b8e6;
+.modal-button-start:hover {
+  background: #074b57;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
 }
-
+.modal-button-piece-select:hover {
+  background: #074b57;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+}
+.modal-button-piece-select {
+  width: 40%;
+  margin: 10px 0;
+  padding: 10px;
+  background: #00b8e6;
+  color: #eff2f3;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.modal-button {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  background: #00b8e6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.modal-button-start {
+  width: 25%;
+  margin: 10px 0;
+  padding: 10px;
+  background: #00b8e6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
 .modal-button:active {
   transform: scale(0.97);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);

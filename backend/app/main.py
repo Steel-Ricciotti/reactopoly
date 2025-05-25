@@ -1,67 +1,85 @@
-# # monopoly-backend/main.py
-# from fastapi import FastAPI, Depends, HTTPException
-# from sqlalchemy.orm import Session
-# from schemas.game import Game, GameCreate
-# from schemas.player import Player, PlayerCreate
-# from schemas.property import Property, PropertyCreate
-# from crud import create_game, get_game, create_player, get_player, create_property, get_property, buy_house
-# from database import Base, engine, get_db
 
-# app = FastAPI()
-
-# # Create database tables
-# Base.metadata.create_all(bind=engine)
-
-# @app.post("/games/", response_model=Game)
-# def create_new_game(game: GameCreate, db: Session = Depends(get_db)):
-#     return create_game(db, game)
-
-# @app.get("/games/{game_id}", response_model=Game)
-# def read_game(game_id: int, db: Session = Depends(get_db)):
-#     db_game = get_game(db, game_id)
-#     if db_game is None:
-#         raise HTTPException(status_code=404, detail="Game not found")
-#     return db_game
-
-# @app.post("/games/{game_id}/players/", response_model=Player)
-# def create_new_player(game_id: int, player: PlayerCreate, db: Session = Depends(get_db)):
-#     db_game = get_game(db, game_id)
-#     if db_game is None:
-#         raise HTTPException(status_code=404, detail="Game not found")
-#     return create_player(db, player, game_id)
-
-# @app.get("/players/{player_id}", response_model=Player)
-# def read_player(player_id: int, db: Session = Depends(get_db)):
-#     db_player = get_player(db, player_id)
-#     if db_player is None:
-#         raise HTTPException(status_code=404, detail="Player not found")
-#     return db_player
-
-# @app.post("/games/{game_id}/properties/", response_model=Property)
-# def create_new_property(game_id: int, property: PropertyCreate, db: Session = Depends(get_db)):
-#     db_game = get_game(db, game_id)
-#     if db_game is None:
-#         raise HTTPException(status_code=404, detail="Game not found")
-#     return create_property(db, property, game_id)
-
-# @app.get("/properties/{property_id}", response_model=Property)
-# def read_property(property_id: int, db: Session = Depends(get_db)):
-#     db_property = get_property(db, property_id)
-#     if db_property is None:
-#         raise HTTPException(status_code=404, detail="Property not found")
-#     return db_property
-
-# @app.post("/players/{player_id}/properties/{property_id}/buy-house", response_model=Property)
-# def buy_house_endpoint(player_id: int, property_id: int, db: Session = Depends(get_db)):
-#     property = buy_house(db, player_id, property_id)
-#     if property is None:
-#         raise HTTPException(status_code=400, detail="Cannot buy house")
-#     return property
-
-from fastapi import FastAPI
-from api.endpoints import router
-from database import Base, engine
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import json
+import os
+from typing import List, Optional
 
 app = FastAPI()
-app.include_router(router)
-Base.metadata.create_all(bind=engine)
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Frontend origin
+    allow_credentials=True,
+    allow_methods=["*"],  # Explicitly allow OPTIONS
+    allow_headers=["*"],  # Allow all headers
+)
+
+
+# Define Pydantic models for game state
+class Property(BaseModel):
+    name: str
+    pos: int
+    color: Optional[str] = None
+    group: Optional[str] = None
+    type: Optional[str] = None
+    price: Optional[float] = None
+    rent: Optional[List[float]] = None
+    owner: Optional[str] = None
+    numHouses: int
+    houseCost: Optional[int] = None
+											  
+    mortgaged: Optional[bool] = False  # Added
+
+    class Config:
+        extra = "ignore"  # Ignore extra fields like ID
+				 
+													   
+
+class Player(BaseModel):
+    id: str
+    name: str
+    piece: str
+    position: int
+    balance: float
+    properties: List[Property]
+    side: str
+    inJail: bool
+    jailTurns: int
+    getOutOfJailFree: int
+    bankrupt: bool
+
+class GameState(BaseModel):
+    players: List[Player]
+    properties: List[Property]
+    currentPlayer: str
+
+SAVE_FILE = "game_state.json"
+
+				 
+				 
+										  
+
+@app.post("/save")
+async def save_game(game_state: GameState):
+    try:
+        with open(SAVE_FILE, "w") as f:
+            json.dump(game_state.model_dump(), f, indent=2)
+        return {"status": "Game saved successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save game: {str(e)}")
+
+@app.get("/load", response_model=GameState)
+async def load_game():
+    if not os.path.exists(SAVE_FILE):
+        raise HTTPException(status_code=404, detail="No saved game found")
+    try:
+										 
+																			 
+        with open(SAVE_FILE, "r") as f:
+            data = json.load(f)
+        return GameState(**data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load game: {str(e)}")

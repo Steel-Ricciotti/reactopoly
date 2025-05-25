@@ -5,7 +5,7 @@ import './styles.css';
 
 function App() {
   return (
-    <div>
+    <div className="board-container">
       <Board />
     </div>
   );
