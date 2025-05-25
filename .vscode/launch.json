@@ -37,6 +37,21 @@
       "skipFiles": [
         "<node_internals>/**"
       ]
+    },
+    {
+      "name": "FastAPI (Uvicorn)",
+      "type": "python",
+      "request": "launch",
+      "module": "uvicorn",
+      "cwd": "${workspaceFolder}/backend/app",
+      "args": [
+        "main:app",             // Update this if your app file isn’t named main.py
+        "--host", "127.0.0.1",
+        "--port", "8000"
+        // Remove "--reload" to allow breakpoints to work
+      ],
+      "jinja": true,
+      "justMyCode": true
     }
   ]
 }

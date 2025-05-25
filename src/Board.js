@@ -1,6 +1,7 @@
 
 // src/Board.js
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import logo from './assets/logo.png';
 import Property from './Property';
 import Corner from './Corner';
@@ -12,22 +13,29 @@ import { properties as initialProperties } from './properties';
 const GO_TO_JAIL_POS = 30;
 const JAIL_POS = 10;
 const COMMUNITY_CHEST_POSITIONS = [2, 17];
-const CHANCE_POSITIONS = [7, 22,36];
-
+const PENALTY_LOCATIONS = [4, 38]; // Income Tax and Luxury Tax
+const CHANCE_POSITIONS = [7, 22, 33]; // Fixed 36 to 33
+  
 const Board = () => {
+  const [isSaving, setIsSaving] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [flashTrigger, setFlashTrigger] = useState(false);
   const [showBuyHouseModal, setShowBuyHouseModal] = useState(false);
   const [showStartMenu, setShowStartMenu] = useState(true);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [showLoadMenu, setShowLoadMenu] = useState(false);
   const [numPlayers, setNumPlayers] = useState(2);
   const [playerSelections, setPlayerSelections] = useState(Array(2).fill(null));
-  const [currentConfigPlayer, setCurrentConfigPlayer] = useState(-1); // Start at main menu
-    const pieceOptions = [
+  const [currentConfigPlayer, setCurrentConfigPlayer] = useState(-1);
+  const [theme, setTheme] = useState('classic');
+  const pieceOptions = [
     { name: 'Thimble', symbol: '🧵' },
     { name: 'Car', symbol: '🚗' },
     { name: 'Dog', symbol: '🐶' },
     { name: 'Hat', symbol: '🎩' },
   ];
+
+  
 
   const [properties, setProperties] = useState(
     initialProperties.map(prop => ({
@@ -36,118 +44,14 @@ const Board = () => {
       houseCost: prop.group === 'purple' ? 50 : 100,
     }))
   );
-  // const [players, setPlayers] = useState([]);
-
-  
-
-
-
-
-
-
-
-
-
-
-
-    const [players, setPlayers] = useState([
-    {
-      id: 'Player 1',
-      name: 'Player 1',
-      piece: 'Thimble',
-      balance: 1500.0,
-      properties: [
-        { ...initialProperties[11], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[13], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[14], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[15], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[16], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[1], owner: 'Player 1', numHouses: 0 },
-      ],
-      side: 'bottom',
-      position: 10,
-      inJail: true,
-      jailTurns: 0,
-      getOutOfJailFree: 0,
-    },
-    {
-      id: 'Player 2',
-      name: 'Player 2',
-      piece: 'Car',
-      balance: 1500.0,
-      properties: [
-        { ...initialProperties[11], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[13], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[14], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[15], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[16], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[17], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[18], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[1], owner: 'Player 1', numHouses: 0 },
-      ],
-      side: 'left',
-      position: 0,
-      inJail: false,
-      jailTurns: 0,
-      getOutOfJailFree: 0,
-    },
-    {
-      id: 'Player 3',
-      name: 'Player 3',
-      piece: 'Dog',
-      balance: 1500.0,
-      properties: [
-        { ...initialProperties[11], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[13], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[14], owner: 'Player 1', numHouses: 0 },
-      ],
-      side: 'top',
-      position: 0,
-      inJail: false,
-      jailTurns: 0,
-      getOutOfJailFree: 0,
-    },
-    {
-      id: 'Player 4',
-      name: 'Player 4',
-      piece: 'Hat',
-      balance: 1500.0,
-      properties: [
-        { ...initialProperties[11], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[13], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[14], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[15], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[16], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[17], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[18], owner: 'Player 1', numHouses: 0 },
-        { ...initialProperties[1], owner: 'Player 1', numHouses: 0 },
-      ],
-      side: 'right',
-      position: 0,
-      inJail: false,
-      jailTurns: 0,
-      getOutOfJailFree: 0,
-    },
-  ]);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  const [bankruptModal, setBankruptModal] = useState({ show: false, player: null });
+  const [winnerModal, setWinnerModal] = useState({ show: false, player: null });
+  const [players, setPlayers] = useState([]);
   const [currentPlayer, setCurrentPlayer] = useState('Player 1');
   const [cardModal, setCardModal] = useState({ show: false, text: '', type: '' });
 
   const CHANCE_CARDS = [
-    { text: 'Advance to GO (Collect $200)', action: 'move', target: 0, money: 200 },
+    { text: 'Advance to GO (Collect $200)', action: 'move', target: 0, amount: 200 },
     { text: 'Go to Jail', action: 'jail' },
     { text: 'Pay poor tax of $15', action: 'pay', amount: 15 },
     { text: 'Collect $150', action: 'collect', amount: 150 },
@@ -174,9 +78,19 @@ const Board = () => {
         handlePositionUpdate(playerId, GO_TO_JAIL_POS);
       } else if (card.action === 'pay') {
         setPlayers(prev =>
-          prev.map(p =>
-            p.id === playerId ? { ...p, balance: p.balance - card.amount } : p
-          )
+          prev.map(p => {
+            if (p.id === playerId) {
+              const newBalance = p.balance - card.amount;
+              if (newBalance <= 0 && !p.bankrupt) {
+                setBankruptModal({ show: true, player: p.name });
+                setTimeout(() => setBankruptModal({ show: false, player: null }), 4000);
+                return { ...p, balance: 0, bankrupt: true };
+              } else {
+                return { ...p, balance: newBalance };
+              }
+            }
+            return p;
+          })
         );
       } else if (card.action === 'collect') {
         setPlayers(prev =>
@@ -260,9 +174,10 @@ const Board = () => {
   };
 
   const nextTurn = () => {
-    const currentIndex = players.findIndex(p => p.id === currentPlayer);
-    const nextIndex = (currentIndex + 1) % players.length;
-    setCurrentPlayer(players[nextIndex].id);
+    const activePlayers = players.filter(p => !p.bankrupt);
+    const currentIndex = activePlayers.findIndex(p => p.id === currentPlayer);
+    const nextIndex = (currentIndex + 1) % activePlayers.length;
+    setCurrentPlayer(activePlayers[nextIndex].id);
   };
 
   const handlePositionUpdate = (playerId, newPosition, rolledDoubles = false) => {
@@ -328,6 +243,25 @@ const Board = () => {
       if (CHANCE_POSITIONS.includes(newPosition)) {
         drawCard('chance', playerId);
       }
+      if (PENALTY_LOCATIONS.includes(newPosition)) {
+        const penaltyAmount = newPosition === 4 ? 200 : 100;
+        setPlayers(prev =>
+          prev.map(p => {
+            if (p.id === playerId) {
+              const newBalance = p.balance - penaltyAmount;
+              if (newBalance <= 0 && !p.bankrupt) {
+                setBankruptModal({ show: true, player: p.name });
+                setTimeout(() => setBankruptModal({ show: false, player: null }), 4000);
+                return { ...p, balance: 0, bankrupt: true };
+              } else {
+                return { ...p, balance: newBalance };
+              }
+            }
+            return p;
+          })
+        );
+        setFlashTrigger(true);
+      }
       const property = properties[newPosition];
       handlePayRent(playerId, property);
       setFlashTrigger(true);
@@ -340,7 +274,13 @@ const Board = () => {
       setPlayers(prev =>
         prev.map(p => {
           if (p.id === playerId) {
-            return { ...p, balance: p.balance - rent };
+            const newBalance = p.balance - rent;
+            if (newBalance <= 0 && !p.bankrupt) {
+              setBankruptModal({ show: true, player: p.name });
+              setTimeout(() => setBankruptModal({ show: false, player: null }), 4000);
+              return { ...p, balance: 0, bankrupt: true };
+            }
+            return { ...p, balance: newBalance };
           }
           if (p.id === property.owner) {
             return { ...p, balance: p.balance + rent };
@@ -350,6 +290,13 @@ const Board = () => {
       );
     }
   };
+
+  useEffect(() => {
+    const activePlayers = players.filter(p => !p.bankrupt);
+    if (activePlayers.length === 1 && !winnerModal.show) {
+      setWinnerModal({ show: true, player: activePlayers[0].name });
+    }
+  }, [players]);
 
   const handlePayJail = (playerId) => {
     setPlayers(prev =>
@@ -414,6 +361,74 @@ const Board = () => {
     setFlashTrigger(true);
     nextTurn();
   };
+  const handleSaveGame = async () => {
+    setIsSaving(true);
+    const gameState = {
+      players: players.map(player => ({
+        ...player,
+        properties: player.properties.map(prop => ({
+          ...prop,
+          pos: prop.ID - 1,
+          houseCost: prop.housecost,
+          mortgaged: prop.mortgaged ?? false,
+        })),
+      })),
+      properties: properties.map(prop => ({
+        name: prop.name,
+        pos: prop.ID - 1,
+        color: prop.color,
+        group: prop.group,
+        type: prop.type,
+        price: prop.price,
+        rent: prop.rent,
+        owner: prop.owner,
+        numHouses: prop.numHouses,
+        houseCost: prop.housecost,
+        mortgaged: prop.mortgaged ?? false,
+      })),
+      currentPlayer,
+    };
+    console.log('Saving gameState:', JSON.stringify(gameState, null, 2));
+    try {
+      await axios.post('http://localhost:8000/save', gameState, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      alert('Game saved successfully!');
+    } catch (error) {
+      console.error('Save game error:', JSON.stringify(error.response?.data, null, 2));
+      alert(`Failed to save game: ${JSON.stringify(error.response?.data?.detail || error.message)}`);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  const handleLoadGame = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/load');
+      const { players, properties, currentPlayer } = response.data;
+      setShowLoadMenu(false);
+    setProperties(properties.map(prop => ({
+      ...prop,
+      pos: initialProperties.find(p => p.name === prop.name)?.pos,
+      ID: initialProperties.find(p => p.name === prop.name)?.ID,
+      housecost: prop.houseCost
+    })));
+    setPlayers(players.map(player => ({
+      ...player,
+      properties: player.properties.map(prop => ({
+        ...prop,
+        pos: initialProperties.find(p => p.name === prop.name)?.pos,
+        ID: initialProperties.find(p => p.name === prop.name)?.ID,
+        housecost: prop.houseCost
+      }))
+    })));
+      setCurrentPlayer(currentPlayer);
+      setShowStartMenu(false);
+      alert('Game loaded successfully!');
+    } catch (error) {
+      console.error('Failed to load game:', error);
+      alert('No saved game found or failed to load.');
+    }
+  };
 
   const getGroupedProperties = (properties) => {
     const groups = {};
@@ -472,7 +487,7 @@ const Board = () => {
 
   const handleStartNewGame = () => {
     setPlayerSelections(Array(numPlayers).fill(null));
-    setCurrentConfigPlayer(0); // Start piece selection
+    setCurrentConfigPlayer(0);
   };
 
   const handlePieceSelect = (piece) => {
@@ -487,7 +502,7 @@ const Board = () => {
       setPlayers(updated.map((symbol, idx) => ({
         id: `Player ${idx + 1}`,
         name: `Player ${idx + 1}`,
-        piece:symbol,
+        piece: symbol,
         position: 0,
         balance: 1500,
         properties: [],
@@ -495,6 +510,7 @@ const Board = () => {
         inJail: false,
         jailTurns: 0,
         getOutOfJailFree: 0,
+        bankrupt: false,
       })));
       setCurrentPlayer('Player 1');
       setShowStartMenu(false);
@@ -507,6 +523,41 @@ const Board = () => {
     }
   }, [flashTrigger]);
 
+  if(showLoadMenu){
+    return (
+      <div className="modal-overlay">
+        <div className="modal">
+          <h2>Load Game</h2>
+          <button className="modal-button" onClick={handleLoadGame}>
+            Load Last Saved Game
+          </button>
+          <button className="modal-button" onClick={() => setShowLoadMenu(false)}>
+            Back
+          </button>
+        </div>
+      </div>
+    );
+  }
+  if(showSettingsMenu){
+    //Presents 4 buttons all of which provide different themes for the board.
+    return (
+      <div className="modal-overlay">
+        <div className="modal">
+          <h2>Change Theme</h2>
+          <button className="modal-button"  onClick={() => setShowSettingsMenu(false)}>
+            Classic
+          </button>
+          <button className="modal-button"  onClick={() => setShowSettingsMenu(false)}>
+            Haunted House
+          </button>
+          <button className="modal-button" onClick={() => setShowSettingsMenu(false)}>
+            Chocolate Factory
+          </button>
+  
+        </div>
+      </div>
+    );
+  }
   if (showStartMenu) {
     return (
       <div className="modal-overlay">
@@ -514,65 +565,67 @@ const Board = () => {
           {currentConfigPlayer >= 0 ? (
             <>
               <h3>Player {currentConfigPlayer + 1}: Choose Your Piece</h3>
-              <div style={{ display: 'flex', gap: 16 }}>
+              <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {pieceOptions
                   .filter(opt => !playerSelections.includes(opt.symbol))
                   .map(opt => (
                     <button
-                      key={opt}
-                      className="modal-button"
+                      key={opt.name}
+                      className="modal-button-piece-select"
                       onClick={() => handlePieceSelect(opt)}
+                      style={{ fontSize: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}
                     >
-                      {opt.symbol}
+                      <span>{opt.symbol}</span>
+                      <span>{opt.name}</span>
                     </button>
                   ))}
               </div>
             </>
           ) : (
             <>
-
-            <div style={{ marginTop: -20, textAlign: 'center' }}>
-              <img
-                src={logo}
-                alt="Reactopoly Logo"
-                style={{ width: '300px', maxWidth: '100%' }}
-              />
-            </div>
+              <div style={{ marginTop: -20, textAlign: 'center' }}>
+                <img
+                  src={logo}
+                  alt="Reactopoly Logo"
+                  style={{ width: '300px', maxWidth: '100%' }}
+                />
+              </div>
               <button
-                className="modal-button"
+                className="modal-button-start"
                 onClick={handleStartNewGame}
               >
                 New Game
               </button>
-              <button className="modal-button" onClick={() => {}}>
+              <button
+                className="modal-button-start"
+                onClick={() => setShowLoadMenu(true)}
+              >
                 Load Game
               </button>
-              <button className="modal-button" onClick={() => {}}>
+              <button className="modal-button-start" onClick={() => setShowSettingsMenu(true)}
+                >
                 Settings
               </button>
-              <button className="modal-button" onClick={() => {}}>
+              <button className="modal-button-start" onClick={() => {}}>
                 Exit
               </button>
-              <div style={{ marginTop: 20 ,textAlign: 'center'}}>
+              <div style={{ marginTop: 20, textAlign: 'center' }}>
                 <label>
                   Number of Players:
                   <select
                     value={numPlayers}
                     onChange={e => setNumPlayers(Number(e.target.value))}
                   >
-                    {[1,2, 3, 4].map(n => (
+                    {[2, 3, 4].map(n => (
                       <option key={n} value={n}>{n}</option>
                     ))}
                   </select>
                 </label>
-              </div>              
-
+              </div>
             </>
           )}
         </div>
-        
       </div>
-      
     );
   }
 
@@ -582,6 +635,23 @@ const Board = () => {
 
   return (
     <div className="game-container">
+      {bankruptModal.show && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h3>{bankruptModal.player} has gone bankrupt!</h3>
+          </div>
+        </div>
+      )}
+      {winnerModal.show && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <h2>{winnerModal.player} wins the game!</h2>
+            <button className="modal-button" onClick={() => window.location.reload()}>
+              Restart
+            </button>
+          </div>
+        </div>
+      )}
       <div className="board">
         <div className="center">
           {cardModal.show && (
@@ -589,6 +659,11 @@ const Board = () => {
               <div className="card-content">{cardModal.text}</div>
             </div>
           )}
+          <img
+            src={logo}
+            alt="Reactopoly Logo"
+            style={{ width: '300px', maxWidth: '100%', position: 'absolute' }}
+          />
           <Dice
             onRoll={() => {}}
             onPositionUpdate={handlePositionUpdate}
@@ -621,11 +696,11 @@ const Board = () => {
             />
           );
         })}
-        {players.map(player => (
+        {players.filter(player => !player.bankrupt).map(player => (
           <Piece
             key={player.id}
             position={player.position}
-            pieceType={player.piece.name || player.piece}
+            pieceType={player.piece}
             playerId={player.id}
           />
         ))}
@@ -654,14 +729,36 @@ const Board = () => {
       </div>
       <div className="sidebar">
         {players.map(player => (
-          <Player
-            key={player.id}
-            name={player.name}
-            piece={player.piece}
-            balance={player.balance}
-            properties={player.properties}
-            isCurrent={player.id === currentPlayer}
-          />
+          <div key={player.id} style={{ position: 'relative' }}>
+            <Player
+              name={player.name}
+              piece={player.piece}
+              balance={player.balance}
+              properties={player.properties}
+              isCurrent={player.id === currentPlayer}
+            />
+            {player.bankrupt && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: 'rgba(255,255,255,0.7)',
+                  color: 'red',
+                  fontWeight: 'bold',
+                  fontSize: 32,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  pointerEvents: 'none',
+                }}
+              >
+                X
+              </div>
+            )}
+          </div>
         ))}
         {getEligibleHouseGroups(currentPlayerObj).length > 0 && (
           <button
@@ -671,6 +768,12 @@ const Board = () => {
             Buy Houses
           </button>
         )}
+        <button
+          style={{ marginTop: 10, width: '100%' }}
+          onClick={handleSaveGame}
+        >
+          Save Game
+        </button>
       </div>
       {showBuyHouseModal && (
         <div className="modal-overlay">
