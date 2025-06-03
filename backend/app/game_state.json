@@ -3,39 +3,13 @@
     {
       "id": "Player 1",
       "name": "Player 1",
-      "piece": "\ud83e\uddf5",
-      "position": 21,
-      "balance": 1657.0,
-      "properties": [],
-      "side": "bottom",
-      "inJail": false,
-      "jailTurns": 0,
-      "getOutOfJailFree": 0,
-      "bankrupt": false
-    },
-    {
-      "id": "Player 2",
-      "name": "Player 2",
       "piece": "\ud83d\ude97",
-      "position": 10,
-      "balance": 1500.0,
-      "properties": [],
-      "side": "left",
-      "inJail": true,
-      "jailTurns": 2,
-      "getOutOfJailFree": 0,
-      "bankrupt": false
-    },
-    {
-      "id": "Player 3",
-      "name": "Player 3",
-      "piece": "\ud83d\udc36",
-      "position": 21,
-      "balance": 1352.0,
+      "position": 11,
+      "balance": 1360.0,
       "properties": [
         {
-          "name": "Virginia Avenue",
-          "pos": 14,
+          "name": "St. Charles Place",
+          "pos": 11,
           "color": "pink",
           "group": "purple",
           "type": "property",
@@ -48,18 +22,32 @@
             750.0,
             950.0
           ],
-          "owner": "Player 3",
+          "owner": "Player 1",
           "numHouses": 0,
           "houseCost": 100,
           "mortgaged": false
-        },
+        }
+      ],
+      "side": "bottom",
+      "inJail": false,
+      "jailTurns": 0,
+      "getOutOfJailFree": 1,
+      "bankrupt": false
+    },
+    {
+      "id": "Player 2",
+      "name": "Player 2",
+      "piece": "\ud83e\uddf5",
+      "position": 19,
+      "balance": 1360.0,
+      "properties": [
         {
-          "name": "Kentucky Avenue",
-          "pos": 21,
-          "color": "red",
-          "group": "red",
+          "name": "Connecticut Avenue",
+          "pos": 9,
+          "color": "light-blue",
+          "group": "lightblue",
           "type": "property",
-          "price": 200.0,
+          "price": 140.0,
           "rent": [
             14.0,
             70.0,
@@ -68,26 +56,13 @@
             750.0,
             950.0
           ],
-          "owner": "Player 3",
+          "owner": "Player 2",
           "numHouses": 0,
           "houseCost": 100,
           "mortgaged": false
         }
       ],
-      "side": "top",
-      "inJail": false,
-      "jailTurns": 0,
-      "getOutOfJailFree": 0,
-      "bankrupt": false
-    },
-    {
-      "id": "Player 4",
-      "name": "Player 4",
-      "piece": "\ud83c\udfa9",
-      "position": 14,
-      "balance": 1671.0,
-      "properties": [],
-      "side": "right",
+      "side": "left",
       "inJail": false,
       "jailTurns": 0,
       "getOutOfJailFree": 0,
@@ -123,7 +98,7 @@
         750.0,
         950.0
       ],
-      "owner": null,
+      "owner": "Player 1",
       "numHouses": 0,
       "houseCost": 100,
       "mortgaged": false
@@ -262,7 +237,7 @@
         750.0,
         950.0
       ],
-      "owner": null,
+      "owner": "Player 2",
       "numHouses": 0,
       "houseCost": 100,
       "mortgaged": false
@@ -295,7 +270,7 @@
         750.0,
         950.0
       ],
-      "owner": null,
+      "owner": "Player 1",
       "numHouses": 0,
       "houseCost": 100,
       "mortgaged": false
@@ -355,7 +330,7 @@
         750.0,
         950.0
       ],
-      "owner": "Player 3",
+      "owner": null,
       "numHouses": 0,
       "houseCost": 100,
       "mortgaged": false
@@ -481,7 +456,7 @@
         750.0,
         950.0
       ],
-      "owner": "Player 3",
+      "owner": null,
       "numHouses": 0,
       "houseCost": 100,
       "mortgaged": false

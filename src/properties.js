@@ -1,7 +1,7 @@
 // src/properties.js
 export const properties = [
     {ID:1 , name: "Go", type: "corner", pos: [1, 11] },
-    {ID:2 , name: "Mediterranean Avenue",group:'lightpurple',owner:null,mortgaged: false,price:60, type: "property",numHouses:1, housecost:100, rent:[14,70,200,550,750,950], color: "brown", pos: [1, 10] },
+    {ID:2 , name: "Mediterranean Avenue",group:'lightpurple',owner:"Player 1",mortgaged: false,price:60, type: "property",numHouses:1, housecost:100, rent:[14,70,200,550,750,950], color: "brown", pos: [1, 10] },
     {ID:3 , name: "Community Chest1", type: "communitychest", pos: [1, 9] },
     {ID:4 , name: "Baltic Avenue",group:'lightpurple', owner:null,mortgaged: false,price:65, type: "property",numHouses:5, housecost:100, rent:[14,70,200,550,750,950], color: "brown", pos: [1, 8] },
     {ID:5 , name: "Income Tax", type: "incometax", pos: [1, 7] },

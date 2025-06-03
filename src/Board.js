@@ -46,7 +46,87 @@ const Board = () => {
   );
   const [bankruptModal, setBankruptModal] = useState({ show: false, player: null });
   const [winnerModal, setWinnerModal] = useState({ show: false, player: null });
-  const [players, setPlayers] = useState([]);
+  // const [players, setPlayers] = useState([]);
+
+const [players, setPlayers] = useState([
+    {
+      id: 'Player 1',
+      name: 'Player 1',
+      piece: 'Thimble',
+      balance: 1500.0,
+      properties: [
+        { ...initialProperties[11], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[13], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[14], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[15], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[16], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[1], owner: 'Player 1', numHouses: 0 },
+      ],
+      side: 'bottom',
+      position: 10,
+      inJail: true,
+      jailTurns: 0,
+      getOutOfJailFree: 0,
+    },
+    {
+      id: 'Player 2',
+      name: 'Player 2',
+      piece: 'Car',
+      balance: 1500.0,
+      properties: [
+        { ...initialProperties[11], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[13], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[14], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[15], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[16], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[17], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[18], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[1], owner: 'Player 1', numHouses: 0 },
+      ],
+      side: 'left',
+      position: 0,
+      inJail: false,
+      jailTurns: 0,
+      getOutOfJailFree: 0,
+    },
+    {
+      id: 'Player 3',
+      name: 'Player 3',
+      piece: 'Dog',
+      balance: 1500.0,
+      properties: [
+        { ...initialProperties[11], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[13], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[14], owner: 'Player 1', numHouses: 0 },
+      ],
+      side: 'top',
+      position: 0,
+      inJail: false,
+      jailTurns: 0,
+      getOutOfJailFree: 0,
+    },
+    {
+      id: 'Player 4',
+      name: 'Player 4',
+      piece: 'Hat',
+      balance: 1500.0,
+      properties: [
+        { ...initialProperties[11], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[13], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[14], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[15], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[16], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[17], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[18], owner: 'Player 1', numHouses: 0 },
+        { ...initialProperties[1], owner: 'Player 1', numHouses: 0 },
+      ],
+      side: 'right',
+      position: 0,
+      inJail: false,
+      jailTurns: 0,
+      getOutOfJailFree: 0,
+    },
+  ]);
   const [currentPlayer, setCurrentPlayer] = useState('Player 1');
   const [cardModal, setCardModal] = useState({ show: false, text: '', type: '' });
 
