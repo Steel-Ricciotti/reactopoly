@@ -1,6 +1,6 @@
 # Reactopoly
 
-**Reactopoly**, a fun game inspired by Monopoly.
+**Reactopoly**, a game inspired by Monopoly.
 
 To run, first clone the repository then navigate to reactopoly/backend/app and run uvicorn main:app --reload
 
